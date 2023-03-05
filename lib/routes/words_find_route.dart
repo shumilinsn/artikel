@@ -12,7 +12,7 @@ class WortFindenRoute extends StatefulWidget {
 }
 
 class WorterFindenState extends State<WortFindenRoute> {
-  final WorterRepository worterRepository = WorterRepository();
+  final WorterRepository worterRepository = WorterRepository.instance;
   final searchFieldController = TextEditingController();
   final labelController = TextEditingController();
 
@@ -20,12 +20,6 @@ class WorterFindenState extends State<WortFindenRoute> {
   bool isLoading = false;
   List<DataRow> tableRows = [];
   List<DataRow> pluralTableRows = [];
-
-  @override
-  void initState() {
-    super.initState();
-    worterRepository.getAll();
-  }
 
   void setWord(String word) {
     setState(() {
@@ -47,7 +41,7 @@ class WorterFindenState extends State<WortFindenRoute> {
         tableRows = [
           DataRow(
             cells: <DataCell>[
-              const     DataCell(Text('Nom.')),
+              const DataCell(Text('Nom.')),
               DataCell(Text('${indefinitiveArtikel(word)}/${word.artikel}')),
             ],
           ),
@@ -59,7 +53,7 @@ class WorterFindenState extends State<WortFindenRoute> {
           ),
           DataRow(
             cells: <DataCell>[
-              const  DataCell(Text('Dat.')),
+              const DataCell(Text('Dat.')),
               DataCell(Text(dativArtikel(word))),
             ],
           ),
@@ -76,19 +70,19 @@ class WorterFindenState extends State<WortFindenRoute> {
         pluralTableRows = [
           DataRow(
             cells: <DataCell>[
-              const     DataCell(Text('Nom.')),
+              const DataCell(Text('Nom.')),
               DataCell(Text('die ${word.pluralForm}')),
             ],
           ),
           DataRow(
             cells: <DataCell>[
-              const     DataCell(Text('Akk.')),
+              const DataCell(Text('Akk.')),
               DataCell(Text('die ${word.pluralForm}')),
             ],
           ),
           DataRow(
             cells: <DataCell>[
-              const     DataCell(Text('Dat.')),
+              const DataCell(Text('Dat.')),
               DataCell(Text('den ${word.pluralForm}')),
             ],
           ),
@@ -164,72 +158,78 @@ class WorterFindenState extends State<WortFindenRoute> {
         title: const Text('Wort finden'),
       ),
       body: Center(
-        child: Column(
-          children: <Widget>[
-            const SizedBox(height: 0),
-            Padding(
-                padding: const EdgeInsets.all(20),
-                child: TextField(
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.allow(RegExp(".*")),
-                    ],
-                    controller: searchFieldController,
-                    onSubmitted: (String str) {
-                      wordLoad();
-                    },
-                    style: const TextStyle(fontSize: 20),
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      hintText: 'Search...',
-                      prefixIcon: IconButton(
-                          onPressed: () {
-                            wordLoad();
-                          },
-                          icon: const Icon(Icons.search)),
-                      suffix:
-                          isLoading ? const CircularProgressIndicator() : null,
-                    ))),
-            const SizedBox(height: 20),
-            Text(
-              word,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 40),
-            Padding(
-              padding: const EdgeInsets.all(5),
-              child: DataTable(
-                  headingRowHeight:
-                      !word.toLowerCase().startsWith('es gibt') ? 20 : 0,
-                  headingTextStyle:
-                      const TextStyle(color: Colors.black, fontSize: 20),
-                  dataTextStyle:
-                      const TextStyle(color: Colors.grey, fontSize: 15),
-                  columns: _createColumns(),
-                  rows: tableRows),
-            ),
-            const SizedBox(height: 40),
-            Text(
-              !word.toLowerCase().startsWith('es gibt') ? 'Plural ' : '',
-              style: const TextStyle(fontSize: 20),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 40),
-            Padding(
-              padding: const EdgeInsets.all(5),
-              child: DataTable(
-                  headingRowHeight:
-                      !word.toLowerCase().startsWith('es gibt') ? 20 : 0,
-                  headingTextStyle:
-                      const TextStyle(color: Colors.black, fontSize: 20),
-                  dataTextStyle:
-                      const TextStyle(color: Colors.grey, fontSize: 15),
-                  columns: _createColumns(),
-                  rows: pluralTableRows),
-            ),
-          ],
-        ),
-      ),
+          child: Column(
+        children: <Widget>[
+          const SizedBox(height: 0),
+          Padding(
+              padding: const EdgeInsets.all(20),
+              child: TextField(
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.allow(RegExp(".*")),
+                  ],
+                  controller: searchFieldController,
+                  onChanged: (String str) {
+                    if (str.length >= 3) {
+                      List<Word> words =
+                          worterRepository.findWords(str.toLowerCase());
+                      print(words);
+                    }
+                  },
+                  onSubmitted: (String str) {
+                    wordLoad();
+                  },
+                  style: const TextStyle(fontSize: 20),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    hintText: 'Search...',
+                    prefixIcon: IconButton(
+                        onPressed: () {
+                          wordLoad();
+                        },
+                        icon: const Icon(Icons.search)),
+                    suffix:
+                        isLoading ? const CircularProgressIndicator() : null,
+                  ))),
+          const SizedBox(height: 20),
+          Text(
+            word,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 40),
+          Padding(
+            padding: const EdgeInsets.all(5),
+            child: DataTable(
+                headingRowHeight:
+                    !word.toLowerCase().startsWith('es gibt') ? 20 : 0,
+                headingTextStyle:
+                    const TextStyle(color: Colors.black, fontSize: 20),
+                dataTextStyle:
+                    const TextStyle(color: Colors.grey, fontSize: 15),
+                columns: _createColumns(),
+                rows: tableRows),
+          ),
+          const SizedBox(height: 40),
+          Text(
+            !word.toLowerCase().startsWith('es gibt') ? 'Plural ' : '',
+            style: const TextStyle(fontSize: 20),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 40),
+          Padding(
+            padding: const EdgeInsets.all(5),
+            child: DataTable(
+                headingRowHeight:
+                    !word.toLowerCase().startsWith('es gibt') ? 20 : 0,
+                headingTextStyle:
+                    const TextStyle(color: Colors.black, fontSize: 20),
+                dataTextStyle:
+                    const TextStyle(color: Colors.grey, fontSize: 15),
+                columns: _createColumns(),
+                rows: pluralTableRows),
+          ),
+        ],
+      )),
     );
   }
 }

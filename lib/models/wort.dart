@@ -5,6 +5,11 @@ class Word {
 
   Word(this.word, this.artikel, this.pluralForm);
 
+  @override
+  String toString() {
+    return '$artikel $word / die $pluralForm';
+  }
+
   static Word fromList(List<dynamic> data) {
     String articleCode = data[2].toString();
     String article;

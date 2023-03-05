@@ -1,3 +1,4 @@
+import 'package:artikel/repository/words_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:artikel/routes/articles_training_route.dart';
 import 'package:artikel/routes/words_find_route.dart';
@@ -50,6 +51,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final WorterRepository _worterRepository = WorterRepository.instance;
 
   @override
   Widget build(BuildContext context) {
